@@ -10,5 +10,7 @@ public:
 	void Start(int port);
 	Socket Accept();
 	void Close();
-	
+
+private:
+
 };

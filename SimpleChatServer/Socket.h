@@ -9,7 +9,7 @@ public:
 	Socket(SOCKET socketId);
 	~Socket();
 
-	SOCKET getSocketId();
+	SOCKET GetSocketId();
 	bool Recieve(std::string& str);
 	bool Send(const std::string& str);
 	void Close();
