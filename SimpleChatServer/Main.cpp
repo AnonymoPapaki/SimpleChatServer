@@ -38,11 +38,13 @@ void SendOnlineList();
 
 int main(int argc, char** argv)
 {
-	fd_set fds = { 0 };
+	
 	InitListener(9090);
 	for (;;)
 	{
-		FD_ZERO(&fds);
+		std::vector<SOCKET> forRemove;
+		fd_set fds = { 0 };
+
 		FD_SET(listener, &fds);
 		for (auto client : clients)
 			FD_SET(client.first, &fds);
@@ -50,22 +52,17 @@ int main(int argc, char** argv)
 		select(0, &fds, NULL, NULL, NULL);
 
 		if (FD_ISSET(listener, &fds))
-		{
 			clients[accept(listener, NULL, NULL)] = ClientInfo{ "",false,false };
-		}
+
 		for (auto client : clients)
-		{
 			if (FD_ISSET(client.first, &fds))
-			{
 				ClientRequest(client.first);
-			}
-		}
-		std::vector<SOCKET> forRemove;
+
+		
 		for (auto client : clients)
-		{
 			if (client.second.RemoveFlag)
 				forRemove.push_back(client.first);
-		}
+
 		for (auto sock : forRemove)
 		{
 			closesocket(sock);
@@ -123,8 +120,6 @@ void ClientRequest(SOCKET sock)
 		else
 			SendTo(clients[sock].Name, tmp, body);
 	}
-
-	int f = 1;
 }
 
 void SendToAll(const std::string& sender, const std::string& msg)
@@ -135,7 +130,7 @@ void SendToAll(const std::string& sender, const std::string& msg)
 		<< "$"
 		<< msg;
 	for (auto client : clients)
-		send(client.first, ss.str().c_str(), ss.str().size(), 0);
+		send(client.first, ss.str().c_str(), ss.str().size(), MSG_OOB);
 }
 void SendTo(const std::string& sender, const std::string& to, const std::string& msg)
 {
